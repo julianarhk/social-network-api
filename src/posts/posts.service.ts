@@ -1,43 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import prisma from '../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class PostsService {
+  constructor(private prisma: PrismaService) {}
+
   async createPost(data) {
-    const newPost = await prisma.post.create({
+    const post = await this.prisma.post.create({
       data: {
         content: data.content,
         user: { connect: { id: data.userId } },
+        password: data.password,
       },
     });
-    return newPost;
+    return post;
   }
 
   async getAllPosts() {
-    const posts = await prisma.post.findMany({
+    const posts = await this.prisma.post.findMany({
       include: { user: true },
     });
     return posts;
   }
 
-  async getPostById(id: string) {
-    const post = await prisma.post.findUnique({
+  async getPostById(id: number) {
+    const post = await this.prisma.post.findUnique({
       where: { id },
-      include: { user: true },
     });
     return post;
   }
 
-  async updatePost(id: string, data) {
-    const updatedPost = await prisma.post.update({
+  async updatePost(id: number, data) {
+    const updatedPost = await this.prisma.post.update({
       where: { id },
       data,
     });
     return updatedPost;
   }
 
-  async deletePost(id: string) {
-    const deletedPost = await prisma.post.delete({
+  async deletePost(id: number) {
+    const deletedPost = await this.prisma.post.delete({
       where: { id },
     });
     return deletedPost;
